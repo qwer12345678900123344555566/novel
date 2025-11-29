@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI长篇小说生成器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 AI长篇小说生成器</h1>
+            <p class="subtitle">交互式剧情创作，支持世界观、角色、时间线管理</p>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="section">
+                    <h3>📡 模型配置</h3>
+                    <button class="btn btn-primary" onclick="showProviderModal()">添加提供商</button>
+                    <div id="providerList" class="provider-list"></div>
+                </div>
+
+                <div class="section">
+                    <h3>💾 存档管理</h3>
+                    <button class="btn btn-secondary" onclick="saveNovel()">保存当前小说</button>
+                    <button class="btn btn-secondary" onclick="showLoadModal()">加载存档</button>
+                    <div id="saveList" class="save-list"></div>
+                </div>
+
+                <div class="section">
+                    <h3>📊 项目信息</h3>
+                    <div class="info-box">
+                        <p>小说名称: <span id="novelTitle">未命名</span></p>
+                        <p>已生成章节: <span id="chapterCount">0</span></p>
+                        <p>总字数: <span id="wordCount">0</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-panel">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('create')">创建小说</button>
+                    <button class="tab" onclick="switchTab('chapters')">章节管理</button>
+                    <button class="tab" onclick="switchTab('worldbuilding')">世界观设定</button>
+                    <button class="tab" onclick="switchTab('interactive')">交互式创作</button>
+                </div>
+
+                <div id="createTab" class="tab-content active">
+                    <div class="card">
+                        <h2>🎬 创建新小说</h2>
+                        <div class="form-group">
+                            <label>小说名称</label>
+                            <input type="text" id="novelName" placeholder="输入小说名称">
+                        </div>
+                        <div class="form-group">
+                            <label>一句话创意</label>
+                            <textarea id="novelIdea" rows="3" placeholder="例如：一个现代程序员穿越到修仙世界，用编程思维修炼成仙"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>小说类型</label>
+                            <select id="novelGenre">
+                                <option value="玄幻">玄幻</option>
+                                <option value="都市">都市</option>
+                                <option value="科幻">科幻</option>
+                                <option value="武侠">武侠</option>
+                                <option value="仙侠">仙侠</option>
+                                <option value="历史">历史</option>
+                                <option value="游戏">游戏</option>
+                                <option value="悬疑">悬疑</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>选择模型</label>
+                            <select id="modelSelect">
+                                <option value="">请先添加提供商</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>总章节数</label>
+                            <input type="number" id="totalChapters" value="10" min="1" max="1000">
+                        </div>
+                        <button class="btn btn-large btn-primary" onclick="initializeNovel()">初始化小说设定</button>
+                        <button class="btn btn-large btn-success" onclick="generateAllChapters()">一键生成所有章节</button>
+                    </div>
+                </div>
+
+                <div id="chaptersTab" class="tab-content">
+                    <div class="card">
+                        <h2>📚 章节列表</h2>
+                        <div class="chapter-controls">
+                            <button class="btn btn-primary" onclick="generateNextChapter()">生成下一章</button>
+                            <button class="btn btn-secondary" onclick="regenerateChapter()">重新生成当前章</button>
+                        </div>
+                        <div id="chapterList" class="chapter-list"></div>
+                    </div>
+                </div>
+
+                <div id="worldbuildingTab" class="tab-content">
+                    <div class="card">
+                        <h2>🌍 世界观设定</h2>
+                        <div id="worldbuildingContent"></div>
+                    </div>
+                </div>
+
+                <div id="interactiveTab" class="tab-content">
+                    <div class="card">
+                        <h2>🎮 交互式创作</h2>
+                        <div class="interactive-panel">
+                            <div id="plotChoices" class="plot-choices"></div>
+                            <div class="chat-container">
+                                <div id="chatMessages" class="chat-messages"></div>
+                                <div class="chat-input-container">
+                                    <textarea id="chatInput" placeholder="输入你的剧情指令或想法..."></textarea>
+                                    <button class="btn btn-primary" onclick="sendChatMessage()">发送</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="providerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('providerModal')">&times;</span>
+            <h2>添加API提供商</h2>
+            <div class="form-group">
+                <label>提供商名称</label>
+                <input type="text" id="providerName" placeholder="例如: OpenAI">
+            </div>
+            <div class="form-group">
+                <label>Base URL</label>
+                <input type="text" id="providerUrl" placeholder="https://api.openai.com">
+            </div>
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="password" id="providerKey" placeholder="sk-...">
+            </div>
+            <button class="btn btn-primary" onclick="addProvider()">添加</button>
+        </div>
+    </div>
+
+    <div id="loadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loadModal')">&times;</span>
+            <h2>加载存档</h2>
+            <div id="loadSaveList"></div>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loadingText">处理中...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
